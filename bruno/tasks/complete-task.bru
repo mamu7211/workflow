@@ -1,0 +1,23 @@
+meta {
+  name: Complete Task
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/tasks/{{taskId}}/complete
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "Approved",
+    "comment": "Genehmigt",
+    "data": {}
+  }
+}

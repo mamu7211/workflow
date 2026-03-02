@@ -1,0 +1,11 @@
+meta {
+  name: Publish Workflow
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/workflows/{{workflowId}}/publish
+  body: none
+  auth: none
+}

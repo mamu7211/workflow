@@ -1,0 +1,59 @@
+meta {
+  name: Create Workflow
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/workflows
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Test Workflow",
+    "description": "Ein einfacher Test-Workflow",
+    "activities": [
+      {
+        "id": "start",
+        "type": "Log",
+        "displayName": "Start",
+        "properties": {
+          "message": "Workflow gestartet",
+          "level": "Info"
+        },
+        "x": 100,
+        "y": 200
+      },
+      {
+        "id": "end",
+        "type": "Log",
+        "displayName": "Ende",
+        "properties": {
+          "message": "Workflow beendet",
+          "level": "Info"
+        },
+        "x": 400,
+        "y": 200
+      }
+    ],
+    "connections": [
+      {
+        "sourceActivityId": "start",
+        "targetActivityId": "end"
+      }
+    ],
+    "variables": {}
+  }
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setVar("workflowId", res.body.id);
+  }
+}

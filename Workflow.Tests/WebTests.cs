@@ -2,11 +2,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Workflow.Tests;
 
+[TestClass]
 public class WebTests
 {
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
 
-    [Fact]
+    [TestMethod]
     public async Task GetWebResourceRootReturnsOkStatusCode()
     {
         // Arrange
@@ -16,10 +17,8 @@ public class WebTests
         appHost.Services.AddLogging(logging =>
         {
             logging.SetMinimumLevel(LogLevel.Debug);
-            // Override the logging filters from the app's configuration
             logging.AddFilter(appHost.Environment.ApplicationName, LogLevel.Debug);
             logging.AddFilter("Aspire.", LogLevel.Debug);
-            // To output logs to the xUnit.net ITestOutputHelper, consider adding a package from https://www.nuget.org/packages?q=xunit+logging
         });
         appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
         {
@@ -35,6 +34,6 @@ public class WebTests
         var response = await httpClient.GetAsync("/", cancellationToken);
 
         // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
     }
 }

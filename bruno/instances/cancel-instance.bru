@@ -1,0 +1,11 @@
+meta {
+  name: Cancel Instance
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/instances/{{instanceId}}/cancel
+  body: none
+  auth: none
+}

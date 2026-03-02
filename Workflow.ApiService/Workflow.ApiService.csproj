@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Workflow.ServiceDefaults\Workflow.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Workflow.Engine\Workflow.Engine.csproj" />
+    <ProjectReference Include="..\Workflow.Engine.Activities\Workflow.Engine.Activities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

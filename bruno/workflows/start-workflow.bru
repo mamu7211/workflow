@@ -1,0 +1,27 @@
+meta {
+  name: Start Workflow
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/workflows/{{workflowId}}/start
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "variables": {}
+  }
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setVar("instanceId", res.body.id);
+  }
+}

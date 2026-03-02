@@ -1,0 +1,11 @@
+meta {
+  name: Delete Workflow
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{baseUrl}}/api/workflows/{{workflowId}}
+  body: none
+  auth: none
+}

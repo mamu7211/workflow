@@ -1,0 +1,11 @@
+meta {
+  name: Get Instance Log
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/instances/{{instanceId}}/log
+  body: none
+  auth: none
+}

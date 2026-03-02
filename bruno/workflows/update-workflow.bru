@@ -1,0 +1,67 @@
+meta {
+  name: Update Workflow
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/workflows/{{workflowId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Updated Workflow",
+    "description": "Aktualisierter Test-Workflow",
+    "activities": [
+      {
+        "id": "start",
+        "type": "Log",
+        "displayName": "Start",
+        "properties": {
+          "message": "Workflow gestartet",
+          "level": "Info"
+        },
+        "x": 100,
+        "y": 200
+      },
+      {
+        "id": "delay",
+        "type": "Delay",
+        "displayName": "Warten",
+        "properties": {
+          "duration": "00:00:05"
+        },
+        "x": 250,
+        "y": 200
+      },
+      {
+        "id": "end",
+        "type": "Log",
+        "displayName": "Ende",
+        "properties": {
+          "message": "Workflow beendet",
+          "level": "Info"
+        },
+        "x": 400,
+        "y": 200
+      }
+    ],
+    "connections": [
+      {
+        "sourceActivityId": "start",
+        "targetActivityId": "delay"
+      },
+      {
+        "sourceActivityId": "delay",
+        "targetActivityId": "end"
+      }
+    ],
+    "variables": {}
+  }
+}

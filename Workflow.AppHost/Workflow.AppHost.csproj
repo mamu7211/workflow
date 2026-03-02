@@ -13,4 +13,9 @@
     <ProjectReference Include="..\Workflow.Web\Workflow.Web.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.1.1" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.1.1" />
+  </ItemGroup>
+
 </Project>

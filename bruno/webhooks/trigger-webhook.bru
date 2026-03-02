@@ -1,0 +1,24 @@
+meta {
+  name: Trigger Webhook
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/webhooks/{{correlationId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "event": "test",
+    "payload": {
+      "message": "Webhook triggered"
+    }
+  }
+}
