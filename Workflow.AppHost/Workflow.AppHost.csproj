@@ -1,0 +1,16 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.1.1">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>354060e3-c894-48f3-a75f-b6f403bea4e1</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Workflow.ApiService\Workflow.ApiService.csproj" />
+    <ProjectReference Include="..\Workflow.Web\Workflow.Web.csproj" />
+  </ItemGroup>
+
+</Project>
