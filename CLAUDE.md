@@ -41,6 +41,12 @@ dotnet run --project Workflow.AppHost
 | RabbitMQ | Message Queue für async Activities | Management UI via Aspire |
 | MailHog | SMTP-Testing | UI auf Port 8025, SMTP auf Port 1025 |
 
+## Branching
+
+- Jede Spec-Phase wird in einem eigenen Branch implementiert (z.B. `feature/01-engine-core`)
+- Nach Fertigstellung wird der Branch in `master` gemergt
+- Hauptbranch: `master`
+
 ## Konventionen
 
 - **Framework:** .NET 10.0 durchgängig
