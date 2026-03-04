@@ -21,8 +21,8 @@ public sealed class ActivityResult
     public static ActivityResult Faulted(string error)
         => new(ActivityResultType.Faulted, error: error);
 
-    public static ActivityResult SuspendExecution(string reason)
-        => new(ActivityResultType.Suspended, suspendReason: reason);
+    public static ActivityResult SuspendExecution(string reason, Dictionary<string, object?>? output = null)
+        => new(ActivityResultType.Suspended, output: output, suspendReason: reason);
 }
 
 public enum ActivityResultType
