@@ -43,9 +43,19 @@ dotnet run --project Workflow.AppHost
 
 ## Branching
 
-- Jede Spec-Phase wird in einem eigenen Branch implementiert (z.B. `feature/01-engine-core`)
-- Nach Fertigstellung wird der Branch in `master` gemergt
 - Hauptbranch: `master`
+- Jede Spec-Phase wird in einem eigenen Feature-Branch implementiert
+- **Branch-Namenskonvention:** `feature/<spec-name>` (z.B. `feature/01-engine-core`, `feature/02-activities`)
+- Nach Fertigstellung wird der Branch in `master` gemergt
+- **WICHTIG:** Zu Beginn jeder Session den aktuellen Branch prüfen (`git branch`). Arbeite immer im passenden Feature-Branch für die jeweilige Phase. Wechsle ggf. mit `git checkout feature/<spec-name>` oder erstelle den Branch mit `git checkout -b feature/<spec-name>` von `master` aus.
+
+| Phase | Spec | Branch |
+|-------|------|--------|
+| 1 | `docs/specs/01-engine-core.md` | `feature/01-engine-core` |
+| 2 | `docs/specs/02-activities.md` | `feature/02-activities` |
+| 3 | `docs/specs/03-api-service.md` | `feature/03-api-service` |
+| 4 | `docs/specs/04-frontend-designer.md` | `feature/04-frontend-designer` |
+| 5 | `docs/specs/05-infrastructure.md` | `feature/05-infrastructure` |
 
 ## Konventionen
 
