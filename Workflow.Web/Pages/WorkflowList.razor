@@ -1,0 +1,146 @@
+@page "/workflows"
+@inject WorkflowApiClient Api
+@inject NavigationManager Navigation
+
+<PageTitle>Workflows</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Workflows</h1>
+    <button class="btn btn-primary" @onclick="CreateNew">Neuen Workflow erstellen</button>
+</div>
+
+@if (_loading)
+{
+    <p>Laden...</p>
+}
+else if (_workflows.Length == 0)
+{
+    <div class="alert alert-info">
+        Keine Workflows vorhanden. Erstellen Sie einen neuen Workflow.
+    </div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Version</th>
+                <th>Status</th>
+                <th>Erstellt</th>
+                <th>Aktualisiert</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var wf in _workflows)
+            {
+                <tr>
+                    <td>@wf.Name</td>
+                    <td>v@(wf.Version)</td>
+                    <td>
+                        @if (wf.IsPublished)
+                        {
+                            <span class="badge bg-success">Published</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Draft</span>
+                        }
+                    </td>
+                    <td>@wf.CreatedAt.ToString("g")</td>
+                    <td>@wf.UpdatedAt.ToString("g")</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" @onclick="() => Edit(wf.Id)">Bearbeiten</button>
+                            @if (!wf.IsPublished)
+                            {
+                                <button class="btn btn-outline-success" @onclick="() => Publish(wf.Id)">Veröffentlichen</button>
+                            }
+                            <button class="btn btn-outline-info" @onclick="() => Start(wf.Id)">Starten</button>
+                            <button class="btn btn-outline-danger" @onclick="() => Delete(wf)">Löschen</button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (_deleteTarget is not null)
+{
+    <div class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Workflow löschen</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Möchten Sie den Workflow <strong>@_deleteTarget.Name</strong> wirklich löschen?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CancelDelete">Abbrechen</button>
+                    <button class="btn btn-danger" @onclick="ConfirmDelete">Löschen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _loading = true;
+    private WorkflowDefinitionDto[] _workflows = [];
+    private WorkflowDefinitionDto? _deleteTarget;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadWorkflows();
+    }
+
+    private async Task LoadWorkflows()
+    {
+        _loading = true;
+        try
+        {
+            _workflows = await Api.GetWorkflowsAsync();
+        }
+        catch
+        {
+            _workflows = [];
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void CreateNew() => Navigation.NavigateTo("/workflows/new");
+
+    private void Edit(string id) => Navigation.NavigateTo($"/workflows/{id}/edit");
+
+    private async Task Publish(string id)
+    {
+        await Api.PublishWorkflowAsync(id);
+        await LoadWorkflows();
+    }
+
+    private async Task Start(string id)
+    {
+        await Api.StartWorkflowAsync(id);
+        Navigation.NavigateTo("/instances");
+    }
+
+    private void Delete(WorkflowDefinitionDto wf) => _deleteTarget = wf;
+
+    private void CancelDelete() => _deleteTarget = null;
+
+    private async Task ConfirmDelete()
+    {
+        if (_deleteTarget is not null)
+        {
+            await Api.DeleteWorkflowAsync(_deleteTarget.Id);
+            _deleteTarget = null;
+            await LoadWorkflows();
+        }
+    }
+}

@@ -1,0 +1,101 @@
+@inject DesignerStateService Designer
+@implements IDisposable
+
+<div class="workflow-canvas" @onmousedown="OnCanvasMouseDown">
+    @if (Designer.CurrentWorkflow is not null)
+    {
+        <svg class="canvas-svg" width="100%" height="100%">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                        refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
+                </marker>
+            </defs>
+
+            @foreach (var connection in Designer.CurrentWorkflow.Connections)
+            {
+                var sourceNode = Designer.CurrentWorkflow.Activities.FirstOrDefault(a => a.Id == connection.SourceActivityId);
+                var targetNode = Designer.CurrentWorkflow.Activities.FirstOrDefault(a => a.Id == connection.TargetActivityId);
+
+                @if (sourceNode is not null && targetNode is not null)
+                {
+                    <ConnectionLine Connection="connection"
+                                    SourceNode="sourceNode"
+                                    TargetNode="targetNode"
+                                    IsSelected="Designer.SelectedConnectionId == connection.Id"
+                                    OnSelect="() => Designer.SelectConnection(connection.Id)" />
+                }
+            }
+
+            @if (_connecting && _connectSourceNode is not null)
+            {
+                <line x1="@(_connectSourceNode.X + 140)" y1="@(_connectSourceNode.Y + 30)"
+                      x2="@_connectTargetX" y2="@_connectTargetY"
+                      stroke="#999" stroke-width="2" stroke-dasharray="5,5" />
+            }
+        </svg>
+
+        @foreach (var node in Designer.CurrentWorkflow.Activities)
+        {
+            <NodeComponent Node="node"
+                           IsSelected="Designer.SelectedNodeId == node.Id"
+                           OnSelect="() => Designer.SelectNode(node.Id)"
+                           OnStartConnect="() => StartConnect(node)"
+                           OnEndConnect="() => EndConnect(node)"
+                           OnPositionChanged="pos => MoveNode(node, pos)" />
+        }
+    }
+</div>
+
+@code {
+    private bool _connecting;
+    private Workflow.Engine.Models.ActivityNode? _connectSourceNode;
+    private double _connectTargetX;
+    private double _connectTargetY;
+
+    protected override void OnInitialized()
+    {
+        Designer.OnChange += StateHasChanged;
+    }
+
+    private void OnCanvasMouseDown()
+    {
+        Designer.SelectNode(null);
+        Designer.SelectConnection(null);
+    }
+
+    private void StartConnect(Workflow.Engine.Models.ActivityNode source)
+    {
+        _connecting = true;
+        _connectSourceNode = source;
+        _connectTargetX = source.X + 200;
+        _connectTargetY = source.Y + 30;
+    }
+
+    private void EndConnect(Workflow.Engine.Models.ActivityNode target)
+    {
+        if (_connecting && _connectSourceNode is not null && _connectSourceNode.Id != target.Id)
+        {
+            var connection = new Workflow.Engine.Models.Connection
+            {
+                Id = Guid.NewGuid().ToString(),
+                SourceActivityId = _connectSourceNode.Id,
+                TargetActivityId = target.Id
+            };
+            Designer.AddConnection(connection);
+        }
+        _connecting = false;
+        _connectSourceNode = null;
+    }
+
+    private void MoveNode(Workflow.Engine.Models.ActivityNode node, (double X, double Y) pos)
+    {
+        node.X = pos.X;
+        node.Y = pos.Y;
+    }
+
+    public void Dispose()
+    {
+        Designer.OnChange -= StateHasChanged;
+    }
+}

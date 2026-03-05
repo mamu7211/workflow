@@ -1,0 +1,142 @@
+@page "/workflows/new"
+@page "/workflows/{Id}/edit"
+@inject WorkflowApiClient Api
+@inject DesignerStateService Designer
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<PageTitle>@(_isNew ? "Neuer Workflow" : "Workflow bearbeiten")</PageTitle>
+
+<div class="designer-container">
+    <div class="designer-toolbar">
+        <div class="d-flex align-items-center gap-2">
+            <input type="text" class="form-control form-control-sm" style="width: 250px"
+                   @bind="_workflowName" @bind:event="oninput" placeholder="Workflow-Name" />
+            <button class="btn btn-sm btn-primary" @onclick="Save" disabled="@_saving">Speichern</button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="Designer.Undo" disabled="@(!Designer.CanUndo)">Rückgängig</button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="Designer.Redo" disabled="@(!Designer.CanRedo)">Wiederholen</button>
+            @if (!_isNew)
+            {
+                <button class="btn btn-sm btn-outline-success" @onclick="StartWorkflow">Starten</button>
+            }
+        </div>
+    </div>
+
+    <div class="designer-body">
+        <div class="designer-palette">
+            <ActivityPalette OnActivityAdded="OnActivityAdded" />
+        </div>
+
+        <div class="designer-canvas">
+            <WorkflowCanvas />
+        </div>
+
+        <div class="designer-properties">
+            <PropertyPanel />
+        </div>
+    </div>
+
+    <div class="designer-preview">
+        <details>
+            <summary>JSON Preview</summary>
+            <pre class="json-preview">@_jsonPreview</pre>
+        </details>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Id { get; set; }
+
+    private bool _isNew => string.IsNullOrEmpty(Id);
+    private string _workflowName = "";
+    private string _jsonPreview = "";
+    private bool _saving;
+    private string? _existingId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Designer.OnChange += UpdateJsonPreview;
+
+        if (!_isNew)
+        {
+            var dto = await Api.GetWorkflowAsync(Id!);
+            if (dto is not null)
+            {
+                _existingId = dto.Id;
+                _workflowName = dto.Name;
+                var definition = System.Text.Json.JsonSerializer.Deserialize<Workflow.Engine.Models.WorkflowDefinition>(dto.Definition.GetRawText());
+                if (definition is not null)
+                {
+                    Designer.LoadWorkflow(definition);
+                }
+            }
+        }
+        else
+        {
+            Designer.LoadWorkflow(new Workflow.Engine.Models.WorkflowDefinition { Name = "Neuer Workflow" });
+            _workflowName = "Neuer Workflow";
+        }
+
+        UpdateJsonPreview();
+    }
+
+    private void OnActivityAdded(Workflow.Engine.Models.ActivityNode node)
+    {
+        Designer.AddNode(node);
+    }
+
+    private void UpdateJsonPreview()
+    {
+        if (Designer.CurrentWorkflow is not null)
+        {
+            Designer.CurrentWorkflow.Name = _workflowName;
+            _jsonPreview = System.Text.Json.JsonSerializer.Serialize(Designer.CurrentWorkflow,
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Save()
+    {
+        if (Designer.CurrentWorkflow is null) return;
+        _saving = true;
+
+        try
+        {
+            Designer.CurrentWorkflow.Name = _workflowName;
+            var json = System.Text.Json.JsonSerializer.Serialize(Designer.CurrentWorkflow);
+            var element = System.Text.Json.JsonDocument.Parse(json).RootElement;
+
+            if (_isNew && _existingId is null)
+            {
+                var result = await Api.CreateWorkflowAsync(new CreateWorkflowDto(_workflowName, null, element));
+                if (result is not null)
+                {
+                    _existingId = result.Id;
+                    Navigation.NavigateTo($"/workflows/{result.Id}/edit", replace: true);
+                }
+            }
+            else
+            {
+                var id = _existingId ?? Id!;
+                await Api.UpdateWorkflowAsync(id, new UpdateWorkflowDto(_workflowName, null, element));
+            }
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task StartWorkflow()
+    {
+        var id = _existingId ?? Id!;
+        await Api.StartWorkflowAsync(id);
+        Navigation.NavigateTo("/instances");
+    }
+
+    public void Dispose()
+    {
+        Designer.OnChange -= UpdateJsonPreview;
+    }
+}

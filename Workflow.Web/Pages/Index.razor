@@ -1,0 +1,115 @@
+@page "/"
+@inject WorkflowApiClient Api
+
+<PageTitle>Dashboard</PageTitle>
+
+<h1>Dashboard</h1>
+
+@if (_loading)
+{
+    <p>Laden...</p>
+}
+else
+{
+    <div class="row g-4 mt-2">
+        <div class="col-md-3">
+            <div class="card text-bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Workflows</h5>
+                    <p class="card-text display-6">@_workflowCount</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Aktive Instanzen</h5>
+                    <p class="card-text display-6">@_activeInstances</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Offene Aufgaben</h5>
+                    <p class="card-text display-6">@_openTasks</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Abgeschlossen</h5>
+                    <p class="card-text display-6">@_completedInstances</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (_recentInstances.Length > 0)
+    {
+        <h4 class="mt-4">Letzte Aktivitäten</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Workflow</th>
+                    <th>Status</th>
+                    <th>Gestartet</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var instance in _recentInstances)
+                {
+                    <tr>
+                        <td>@instance.WorkflowDefinitionId</td>
+                        <td><span class="badge @GetStatusBadgeClass(instance.Status)">@instance.Status</span></td>
+                        <td>@instance.CreatedAt.ToString("g")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private bool _loading = true;
+    private int _workflowCount;
+    private int _activeInstances;
+    private int _completedInstances;
+    private int _openTasks;
+    private WorkflowInstanceDto[] _recentInstances = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var workflows = await Api.GetWorkflowsAsync();
+            var instances = await Api.GetInstancesAsync();
+            var tasks = await Api.GetTasksAsync();
+
+            _workflowCount = workflows.Length;
+            _activeInstances = instances.Count(i => i.Status is "Running" or "Suspended");
+            _completedInstances = instances.Count(i => i.Status == "Completed");
+            _openTasks = tasks.Count(t => t.Status == "Pending");
+            _recentInstances = instances.OrderByDescending(i => i.CreatedAt).Take(5).ToArray();
+        }
+        catch
+        {
+            // API not available yet
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private static string GetStatusBadgeClass(string status) => status switch
+    {
+        "Running" => "bg-primary",
+        "Suspended" => "bg-warning text-dark",
+        "Completed" => "bg-success",
+        "Faulted" => "bg-danger",
+        "Cancelled" => "bg-secondary",
+        _ => "bg-info"
+    };
+}

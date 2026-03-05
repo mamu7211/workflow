@@ -1,0 +1,95 @@
+@inject WorkflowApiClient Api
+
+<div class="activity-palette">
+    <h6 class="palette-title">Activities</h6>
+
+    @foreach (var group in _groupedTypes)
+    {
+        <div class="palette-group">
+            <small class="text-muted fw-bold">@group.Key</small>
+            @foreach (var type in group.Value)
+            {
+                <div class="palette-item"
+                     draggable="true"
+                     @ondragstart="() => _dragType = type"
+                     @onclick="() => AddActivity(type)">
+                    <span class="palette-icon">@GetIcon(type)</span>
+                    <span>@type</span>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public EventCallback<Workflow.Engine.Models.ActivityNode> OnActivityAdded { get; set; }
+
+    private string[] _types = [];
+    private string? _dragType;
+    private static int _nextX = 200;
+    private static int _nextY = 100;
+
+    private Dictionary<string, string[]> _groupedTypes => _types.GroupBy(GetCategory)
+        .OrderBy(g => g.Key)
+        .ToDictionary(g => g.Key, g => g.ToArray());
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var types = await Api.GetActivityTypesAsync();
+            _types = types.Select(t => t.Type).ToArray();
+        }
+        catch
+        {
+            _types = ["Log", "SetVariable", "Delay", "SendEmail", "HttpRequest",
+                       "UserTask", "RabbitMqPublish", "RabbitMqSubscribe",
+                       "DatabaseQuery", "ScriptExecution", "WebhookTrigger"];
+        }
+    }
+
+    private async Task AddActivity(string type)
+    {
+        var node = new Workflow.Engine.Models.ActivityNode
+        {
+            Id = Guid.NewGuid().ToString(),
+            Type = type,
+            DisplayName = type,
+            X = _nextX,
+            Y = _nextY
+        };
+        _nextX += 50;
+        _nextY += 30;
+        if (_nextX > 600) { _nextX = 200; _nextY = 100; }
+
+        await OnActivityAdded.InvokeAsync(node);
+    }
+
+    private static string GetCategory(string type) => type switch
+    {
+        "Log" or "SetVariable" => "Utility",
+        "Delay" => "Control Flow",
+        "SendEmail" or "HttpRequest" or "WebhookTrigger" => "Integration",
+        "UserTask" => "Human",
+        "RabbitMqPublish" or "RabbitMqSubscribe" => "Messaging",
+        "DatabaseQuery" => "Data",
+        "ScriptExecution" => "Scripting",
+        _ => "Other"
+    };
+
+    private static string GetIcon(string type) => type switch
+    {
+        "Log" => "\ud83d\udcdd",
+        "SetVariable" => "\ud83d\udcbe",
+        "Delay" => "\u23f1",
+        "SendEmail" => "\u2709",
+        "HttpRequest" => "\ud83c\udf10",
+        "UserTask" => "\ud83d\udc64",
+        "RabbitMqPublish" => "\ud83d\udce4",
+        "RabbitMqSubscribe" => "\ud83d\udce5",
+        "DatabaseQuery" => "\ud83d\uddc4",
+        "ScriptExecution" => "\u2699",
+        "WebhookTrigger" => "\ud83d\udd17",
+        _ => "\u25cb"
+    };
+}

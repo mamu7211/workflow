@@ -1,0 +1,74 @@
+<div class="workflow-node @(IsSelected ? "selected" : "") @GetCategoryClass()"
+     style="left: @(Node.X)px; top: @(Node.Y)px;"
+     @onclick="OnSelect"
+     @onclick:stopPropagation="true"
+     @onmousedown="OnMouseDown"
+     @onmousedown:stopPropagation="true">
+
+    <div class="node-header">
+        <span class="node-icon">@GetIcon()</span>
+        <span class="node-type">@Node.Type</span>
+    </div>
+
+    <div class="node-body">
+        @(Node.DisplayName ?? Node.Type)
+    </div>
+
+    <div class="node-port node-port-in"
+         @onmouseup="OnEndConnect"
+         @onmouseup:stopPropagation="true"
+         title="Input">
+    </div>
+    <div class="node-port node-port-out"
+         @onmousedown="OnOutputMouseDown"
+         @onmousedown:stopPropagation="true"
+         title="Output">
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Workflow.Engine.Models.ActivityNode Node { get; set; } = default!;
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public EventCallback OnSelect { get; set; }
+    [Parameter] public EventCallback OnStartConnect { get; set; }
+    [Parameter] public EventCallback OnEndConnect { get; set; }
+    [Parameter] public EventCallback<(double X, double Y)> OnPositionChanged { get; set; }
+
+    private void OnMouseDown(MouseEventArgs e)
+    {
+        OnSelect.InvokeAsync();
+    }
+
+    private void OnOutputMouseDown(MouseEventArgs e)
+    {
+        OnStartConnect.InvokeAsync();
+    }
+
+    private string GetCategoryClass() => Node.Type switch
+    {
+        "Log" or "SetVariable" => "category-utility",
+        "Delay" => "category-control",
+        "SendEmail" or "HttpRequest" or "WebhookTrigger" => "category-integration",
+        "UserTask" => "category-human",
+        "RabbitMqPublish" or "RabbitMqSubscribe" => "category-messaging",
+        "DatabaseQuery" => "category-data",
+        "ScriptExecution" => "category-scripting",
+        _ => ""
+    };
+
+    private string GetIcon() => Node.Type switch
+    {
+        "Log" => "\ud83d\udcdd",
+        "SetVariable" => "\ud83d\udcbe",
+        "Delay" => "\u23f1",
+        "SendEmail" => "\u2709",
+        "HttpRequest" => "\ud83c\udf10",
+        "UserTask" => "\ud83d\udc64",
+        "RabbitMqPublish" => "\ud83d\udce4",
+        "RabbitMqSubscribe" => "\ud83d\udce5",
+        "DatabaseQuery" => "\ud83d\uddc4",
+        "ScriptExecution" => "\u2699",
+        "WebhookTrigger" => "\ud83d\udd17",
+        _ => "\u25cb"
+    };
+}

@@ -1,0 +1,32 @@
+@{
+    var sx = SourceNode.X + 140;
+    var sy = SourceNode.Y + 30;
+    var tx = TargetNode.X;
+    var ty = TargetNode.Y + 30;
+
+    var dx = Math.Abs(tx - sx) * 0.5;
+    var path = $"M {sx} {sy} C {sx + dx} {sy}, {tx - dx} {ty}, {tx} {ty}";
+}
+
+<g class="connection-group @(IsSelected ? "selected" : "")" @onclick="OnSelect" @onclick:stopPropagation="true">
+    <path d="@path" class="connection-line-hit" fill="none" stroke="transparent" stroke-width="12" />
+    <path d="@path" class="connection-line" fill="none"
+          stroke="@(IsSelected ? "#0d6efd" : "#666")"
+          stroke-width="@(IsSelected ? 3 : 2)"
+          marker-end="url(#arrowhead)" />
+
+    @if (!string.IsNullOrEmpty(Connection.Condition))
+    {
+        var mx = (sx + tx) / 2;
+        var my = (sy + ty) / 2;
+        @((MarkupString)$"<text x=\"{mx}\" y=\"{my - 8}\" class=\"connection-label\" text-anchor=\"middle\">{Connection.Condition}</text>")
+    }
+</g>
+
+@code {
+    [Parameter, EditorRequired] public Workflow.Engine.Models.Connection Connection { get; set; } = default!;
+    [Parameter, EditorRequired] public Workflow.Engine.Models.ActivityNode SourceNode { get; set; } = default!;
+    [Parameter, EditorRequired] public Workflow.Engine.Models.ActivityNode TargetNode { get; set; } = default!;
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public EventCallback OnSelect { get; set; }
+}
