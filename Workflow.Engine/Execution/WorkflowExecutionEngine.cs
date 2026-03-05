@@ -172,6 +172,8 @@ public sealed class WorkflowExecutionEngine
 
                     case ActivityResultType.Suspended:
                         instance.ActivityStates[activityId].Status = ActivityExecutionStatus.Suspended;
+                        if (result.Output is not null)
+                            instance.ActivityStates[activityId].Output = result.Output;
                         instance.Status = WorkflowStatus.Suspended;
                         return;
                 }
