@@ -101,7 +101,7 @@ Workflow.sln
 | `Workflow.Engine.Activities` | Class Library | Engine |
 | `Workflow.Engine.Tests` | MSTest 4.0.1 | Engine, Activities |
 | `Workflow.ApiService` | ASP.NET Core Web | Engine, Activities, ServiceDefaults |
-| `Workflow.Web` | Blazor | ServiceDefaults |
+| `Workflow.Web` | Blazor WASM | Engine |
 | `Workflow.AppHost` | Aspire Host | ApiService, Web |
 
 ### System Overview
@@ -573,9 +573,9 @@ master
 |-------|-------------|--------|
 | 0 | Project structure, documentation, Aspire infrastructure | Done |
 | 1 | Engine core: DAG model, execution engine, expression evaluator | Done |
-| 2 | Built-in activities (11 types) | Planned |
-| 3 | REST API, EF Core persistence, background services | Planned |
-| 4 | Blazor WASM frontend with visual node editor | Planned |
+| 2 | Built-in activities (11 types) | Done |
+| 3 | REST API, EF Core persistence, background services | Done |
+| 4 | Blazor WASM frontend with visual node editor | Done |
 | 5 | Integration tests, demo workflows, end-to-end verification | Planned |
 
 Detailed specifications for each phase are in [`docs/specs/`](docs/specs/). Implementation progress is tracked in [`docs/specs/progress.md`](docs/specs/progress.md).
