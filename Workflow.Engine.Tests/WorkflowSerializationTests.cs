@@ -132,6 +132,43 @@ public class WorkflowSerializationTests
     }
 
     [TestMethod]
+    public void Serialize_CamelCase_Deserialize_WithOptions_PreservesNodes()
+    {
+        // Regression test for Bug #004: Frontend serialized with camelCase,
+        // Backend deserialized with WorkflowJsonConverter - nodes must survive round-trip
+        var definition = new WorkflowDefinition
+        {
+            Id = "wf-roundtrip",
+            Name = "Roundtrip Test",
+            Activities =
+            [
+                new ActivityNode { Id = "node-1", Type = "Log", DisplayName = "First", X = 10, Y = 20 },
+                new ActivityNode { Id = "node-2", Type = "Http", DisplayName = "Second", X = 100, Y = 200 }
+            ],
+            Connections =
+            [
+                new Connection { Id = "conn-1", SourceActivityId = "node-1", TargetActivityId = "node-2" }
+            ],
+            Variables = new() { ["key"] = "value" }
+        };
+
+        // Simulate: serialize with WorkflowJsonConverter (camelCase) as frontend now does
+        var json = WorkflowJsonConverter.Serialize(definition);
+
+        // Simulate: Backend deserializes with same options
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<WorkflowDefinition>(
+            json, WorkflowJsonConverter.CreateOptions());
+
+        Assert.IsNotNull(deserialized);
+        Assert.AreEqual(2, deserialized.Activities.Count, "Activities must be preserved");
+        Assert.AreEqual("node-1", deserialized.Activities[0].Id);
+        Assert.AreEqual("node-2", deserialized.Activities[1].Id);
+        Assert.AreEqual(1, deserialized.Connections.Count, "Connections must be preserved");
+        Assert.AreEqual("conn-1", deserialized.Connections[0].Id);
+        Assert.AreEqual(1, deserialized.Variables.Count, "Variables must be preserved");
+    }
+
+    [TestMethod]
     public void Serialize_EnumsAsStrings()
     {
         var instance = new WorkflowInstance

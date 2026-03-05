@@ -1,5 +1,5 @@
-using System.Text.Json;
 using Workflow.Engine.Models;
+using Workflow.Engine.Serialization;
 
 namespace Workflow.Web;
 
@@ -128,10 +128,10 @@ public class DesignerStateService
     }
 
     private static string SerializeWorkflow(WorkflowDefinition workflow) =>
-        JsonSerializer.Serialize(workflow);
+        WorkflowJsonConverter.Serialize(workflow);
 
     private static WorkflowDefinition DeserializeWorkflow(string json) =>
-        JsonSerializer.Deserialize<WorkflowDefinition>(json)!;
+        WorkflowJsonConverter.DeserializeDefinition(json)!;
 
     private void NotifyStateChanged() => OnChange?.Invoke();
 }
