@@ -43,7 +43,7 @@
             <NodeComponent Node="node"
                            IsSelected="Designer.SelectedNodeId == node.Id"
                            OnSelect="() => Designer.SelectNode(node.Id)"
-                           OnStartConnect="() => StartConnect(node)"
+                           OnStartConnect="e => StartConnect(node, e)"
                            OnEndConnect="() => EndConnect(node)"
                            OnPositionChanged="pos => MoveNode(node, pos)"
                            OnDragStart="e => BeginDrag(node, e)" />
@@ -56,6 +56,10 @@
     private Workflow.Engine.Models.ActivityNode? _connectSourceNode;
     private double _connectTargetX;
     private double _connectTargetY;
+    private double _connectStartMouseX;
+    private double _connectStartMouseY;
+    private double _connectInitialTargetX;
+    private double _connectInitialTargetY;
 
     private Workflow.Engine.Models.ActivityNode? _draggingNode;
     private double _dragStartMouseX;
@@ -71,6 +75,12 @@
 
     private void OnCanvasMouseDown()
     {
+        if (_connecting)
+        {
+            _connecting = false;
+            _connectSourceNode = null;
+            return;
+        }
         if (_didDrag)
         {
             _didDrag = false;
@@ -82,6 +92,8 @@
 
     private void BeginDrag(Workflow.Engine.Models.ActivityNode node, MouseEventArgs e)
     {
+        if (_connecting) return;
+
         Designer.SaveSnapshot();
         _draggingNode = node;
         _dragStartMouseX = e.ClientX;
@@ -93,7 +105,12 @@
 
     private void OnCanvasMouseMove(MouseEventArgs e)
     {
-        if (_draggingNode is not null)
+        if (_connecting)
+        {
+            _connectTargetX = _connectInitialTargetX + (e.ClientX - _connectStartMouseX);
+            _connectTargetY = _connectInitialTargetY + (e.ClientY - _connectStartMouseY);
+        }
+        else if (_draggingNode is not null)
         {
             _draggingNode.X = _dragStartNodeX + (e.ClientX - _dragStartMouseX);
             _draggingNode.Y = _dragStartNodeY + (e.ClientY - _dragStartMouseY);
@@ -106,12 +123,16 @@
         _draggingNode = null;
     }
 
-    private void StartConnect(Workflow.Engine.Models.ActivityNode source)
+    private void StartConnect(Workflow.Engine.Models.ActivityNode source, MouseEventArgs e)
     {
         _connecting = true;
         _connectSourceNode = source;
-        _connectTargetX = source.X + 200;
-        _connectTargetY = source.Y + 30;
+        _connectStartMouseX = e.ClientX;
+        _connectStartMouseY = e.ClientY;
+        _connectInitialTargetX = source.X + 200;
+        _connectInitialTargetY = source.Y + 30;
+        _connectTargetX = _connectInitialTargetX;
+        _connectTargetY = _connectInitialTargetY;
     }
 
     private void EndConnect(Workflow.Engine.Models.ActivityNode target)
