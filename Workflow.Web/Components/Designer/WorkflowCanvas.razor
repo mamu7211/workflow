@@ -32,9 +32,13 @@
 
             @if (_connecting && _connectSourceNode is not null)
             {
-                <line x1="@(_connectSourceNode.X + 140)" y1="@(_connectSourceNode.Y + 30)"
-                      x2="@_connectTargetX" y2="@_connectTargetY"
-                      stroke="#999" stroke-width="2" stroke-dasharray="5,5" />
+                var previewSx = _connectSourceNode.X + 140;
+                var previewSy = _connectSourceNode.Y + 30;
+                var previewTx = _connectTargetX;
+                var previewTy = _connectTargetY;
+                var previewDx = Math.Abs(previewTx - previewSx) * 0.5;
+                var previewPath = FormattableString.Invariant($"M {previewSx} {previewSy} C {previewSx + previewDx} {previewSy}, {previewTx - previewDx} {previewTy}, {previewTx} {previewTy}");
+                <path d="@previewPath" fill="none" stroke="#999" stroke-width="2" stroke-dasharray="5,5" />
             }
         </svg>
 
@@ -129,7 +133,7 @@
         _connectSourceNode = source;
         _connectStartMouseX = e.ClientX;
         _connectStartMouseY = e.ClientY;
-        _connectInitialTargetX = source.X + 200;
+        _connectInitialTargetX = source.X + 140;
         _connectInitialTargetY = source.Y + 30;
         _connectTargetX = _connectInitialTargetX;
         _connectTargetY = _connectInitialTargetY;
