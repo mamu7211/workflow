@@ -7,13 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Workflow.Engine.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Workflow.ServiceDefaults\Workflow.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Workflow.Engine\Workflow.Engine.csproj" />
     <ProjectReference Include="..\Workflow.Engine.Activities\Workflow.Engine.Activities.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.1.1" />
+    <PackageReference Include="Aspire.RabbitMQ.Client" Version="13.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>
