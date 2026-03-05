@@ -1,7 +1,8 @@
 @inject DesignerStateService Designer
 @implements IDisposable
 
-<div class="workflow-canvas" @onmousedown="OnCanvasMouseDown">
+<div class="workflow-canvas" @onmousedown="OnCanvasMouseDown"
+     @onmousemove="OnCanvasMouseMove" @onmouseup="OnCanvasMouseUp">
     @if (Designer.CurrentWorkflow is not null)
     {
         <svg class="canvas-svg" width="100%" height="100%">
@@ -42,7 +43,8 @@
                            OnSelect="() => Designer.SelectNode(node.Id)"
                            OnStartConnect="() => StartConnect(node)"
                            OnEndConnect="() => EndConnect(node)"
-                           OnPositionChanged="pos => MoveNode(node, pos)" />
+                           OnPositionChanged="pos => MoveNode(node, pos)"
+                           OnDragStart="e => BeginDrag(node, e)" />
         }
     }
 </div>
@@ -53,6 +55,13 @@
     private double _connectTargetX;
     private double _connectTargetY;
 
+    private Workflow.Engine.Models.ActivityNode? _draggingNode;
+    private double _dragStartMouseX;
+    private double _dragStartMouseY;
+    private double _dragStartNodeX;
+    private double _dragStartNodeY;
+    private bool _didDrag;
+
     protected override void OnInitialized()
     {
         Designer.OnChange += StateHasChanged;
@@ -60,8 +69,39 @@
 
     private void OnCanvasMouseDown()
     {
+        if (_didDrag)
+        {
+            _didDrag = false;
+            return;
+        }
         Designer.SelectNode(null);
         Designer.SelectConnection(null);
+    }
+
+    private void BeginDrag(Workflow.Engine.Models.ActivityNode node, MouseEventArgs e)
+    {
+        Designer.SaveSnapshot();
+        _draggingNode = node;
+        _dragStartMouseX = e.ClientX;
+        _dragStartMouseY = e.ClientY;
+        _dragStartNodeX = node.X;
+        _dragStartNodeY = node.Y;
+        _didDrag = false;
+    }
+
+    private void OnCanvasMouseMove(MouseEventArgs e)
+    {
+        if (_draggingNode is not null)
+        {
+            _draggingNode.X = _dragStartNodeX + (e.ClientX - _dragStartMouseX);
+            _draggingNode.Y = _dragStartNodeY + (e.ClientY - _dragStartMouseY);
+            _didDrag = true;
+        }
+    }
+
+    private void OnCanvasMouseUp(MouseEventArgs e)
+    {
+        _draggingNode = null;
     }
 
     private void StartConnect(Workflow.Engine.Models.ActivityNode source)
