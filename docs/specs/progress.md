@@ -92,23 +92,23 @@
 
 ## Phase 4: Frontend (Blazor WASM)
 
-| Task                       | Status | Notizen |
-|----------------------------|--------|---------|
-| Blazor WASM Umstellung     | ⬜      |         |
-| WorkflowApiClient          | ⬜      |         |
-| DesignerStateService       | ⬜      |         |
-| MainLayout + NavMenu       | ⬜      |         |
-| Dashboard (Index)          | ⬜      |         |
-| WorkflowList Seite         | ⬜      |         |
-| WorkflowDesigner Seite     | ⬜      |         |
-| ActivityPalette Komponente | ⬜      |         |
-| WorkflowCanvas Komponente  | ⬜      |         |
-| NodeComponent              | ⬜      |         |
-| ConnectionLine             | ⬜      |         |
-| PropertyPanel              | ⬜      |         |
-| WorkflowInstances Seite    | ⬜      |         |
-| UserTasks Seite            | ⬜      |         |
-| bUnit Tests                | ⬜      |         |
+| Task                       | Status | Notizen                                      |
+|----------------------------|--------|----------------------------------------------|
+| Blazor WASM Umstellung     | ✅      | SDK: BlazorWebAssembly, .NET 10 Fingerprints |
+| WorkflowApiClient          | ✅      | Typed HTTP client + DTOs für alle Endpoints  |
+| DesignerStateService       | ✅      | Undo/Redo via JSON-Snapshot-Stack            |
+| MainLayout + NavMenu       | ✅      | Sidebar mit 4 Nav-Einträgen                  |
+| Dashboard (Index)          | ✅      | Workflow/Instanz/Task-Zähler + letzte Aktivitäten |
+| WorkflowList Seite         | ✅      | CRUD-Tabelle mit Delete-Bestätigungsdialog   |
+| WorkflowDesigner Seite     | ✅      | Toolbar, Palette, Canvas, Properties, JSON   |
+| ActivityPalette Komponente | ✅      | Gruppiert nach Kategorie, Drag & Drop        |
+| WorkflowCanvas Komponente  | ✅      | SVG-basiert mit Bezier-Verbindungen          |
+| NodeComponent              | ✅      | Kategorie-Farben, Input/Output-Ports         |
+| ConnectionLine             | ✅      | Bezier-Kurven mit Pfeilspitzen               |
+| PropertyPanel              | ✅      | Dynamische Formulare pro Activity-Typ        |
+| WorkflowInstances Seite    | ✅      | Liste/Detail mit Status-Filter, Execution Log|
+| UserTasks Seite            | ✅      | Inbox mit Genehmigen/Ablehnen-Dialog         |
+| bUnit Tests                | ✅      | 43 Tests (5 Testklassen), alle grün          |
 
 ## Phase 5: Integration und End-to-End
 
@@ -131,3 +131,4 @@
 | 2026-03-02 | Phase 1 abgeschlossen: Engine Core (DAG, Execution, Expressions)               |
 | 2026-03-02 | Phase 2 abgeschlossen: 11 Built-in Activities mit Tests                         |
 | 2026-03-05 | Phase 3 abgeschlossen: API Service, Persistierung, Background Services          |
+| 2026-03-05 | Phase 4 abgeschlossen: Blazor WASM Frontend mit Node-Editor, 43 bUnit Tests     |

@@ -1,0 +1,236 @@
+@inject DesignerStateService Designer
+@implements IDisposable
+
+<div class="property-panel">
+    @if (_selectedNode is not null)
+    {
+        <h6>Eigenschaften</h6>
+        <div class="mb-2">
+            <label class="form-label form-label-sm">Display Name</label>
+            <input type="text" class="form-control form-control-sm"
+                   value="@_selectedNode.DisplayName"
+                   @onchange="e => UpdateDisplayName(e.Value?.ToString())" />
+        </div>
+
+        <hr />
+        <small class="text-muted fw-bold">@_selectedNode.Type Eigenschaften</small>
+
+        @switch (_selectedNode.Type)
+        {
+            case "Log":
+                @RenderTextArea("Message", "message")
+                @RenderDropdown("Level", "level", ["Information", "Warning", "Error", "Debug"])
+                break;
+
+            case "SetVariable":
+                @RenderTextField("Variable Name", "variableName")
+                @RenderTextField("Value", "value")
+                break;
+
+            case "Delay":
+                @RenderTextField("Duration (z.B. 00:00:30)", "duration")
+                break;
+
+            case "SendEmail":
+                @RenderTextField("To", "to")
+                @RenderTextField("Subject", "subject")
+                @RenderTextArea("Body", "body")
+                @RenderCheckbox("Is HTML", "isHtml")
+                break;
+
+            case "HttpRequest":
+                @RenderTextField("URL", "url")
+                @RenderDropdown("Method", "method", ["GET", "POST", "PUT", "DELETE", "PATCH"])
+                @RenderTextArea("Headers (key=value)", "headers")
+                @RenderTextArea("Body", "body")
+                break;
+
+            case "UserTask":
+                @RenderTextField("Title", "title")
+                @RenderTextArea("Description", "description")
+                @RenderTextField("Assigned To", "assignedTo")
+                break;
+
+            case "RabbitMqPublish":
+                @RenderTextField("Exchange", "exchange")
+                @RenderTextField("Routing Key", "routingKey")
+                @RenderTextArea("Message", "message")
+                break;
+
+            case "RabbitMqSubscribe":
+                @RenderTextField("Queue Name", "queueName")
+                @RenderTextField("Timeout (z.B. 00:05:00)", "timeout")
+                break;
+
+            case "DatabaseQuery":
+                @RenderTextArea("Query", "query")
+                @RenderTextArea("Parameters (key=value)", "parameters")
+                break;
+
+            case "ScriptExecution":
+                @RenderTextArea("Script", "script")
+                @RenderTextField("Timeout (Sekunden)", "timeoutSeconds")
+                break;
+
+            case "WebhookTrigger":
+                @RenderTextField("Path", "path")
+                @RenderDropdown("Expected Method", "expectedMethod", ["POST", "GET", "PUT"])
+                break;
+        }
+
+        <hr />
+        <button class="btn btn-sm btn-outline-danger" @onclick="() => Designer.RemoveNode(_selectedNode.Id)">
+            Knoten löschen
+        </button>
+    }
+    else if (Designer.SelectedConnectionId is not null && _selectedConnection is not null)
+    {
+        <h6>Verbindung</h6>
+        <div class="mb-2">
+            <label class="form-label form-label-sm">Bedingung</label>
+            <input type="text" class="form-control form-control-sm"
+                   value="@_selectedConnection.Condition"
+                   @onchange="e => UpdateConnectionCondition(e.Value?.ToString())" />
+        </div>
+        <button class="btn btn-sm btn-outline-danger mt-2"
+                @onclick="() => Designer.RemoveConnection(_selectedConnection.Id)">
+            Verbindung löschen
+        </button>
+    }
+    else
+    {
+        <p class="text-muted small">Wählen Sie einen Knoten oder eine Verbindung aus.</p>
+    }
+</div>
+
+@code {
+    private Workflow.Engine.Models.ActivityNode? _selectedNode;
+    private Workflow.Engine.Models.Connection? _selectedConnection;
+
+    protected override void OnInitialized()
+    {
+        Designer.OnChange += OnDesignerChanged;
+        UpdateSelection();
+    }
+
+    private void OnDesignerChanged()
+    {
+        UpdateSelection();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateSelection()
+    {
+        _selectedNode = Designer.SelectedNodeId is not null
+            ? Designer.CurrentWorkflow?.Activities.FirstOrDefault(a => a.Id == Designer.SelectedNodeId)
+            : null;
+        _selectedConnection = Designer.SelectedConnectionId is not null
+            ? Designer.CurrentWorkflow?.Connections.FirstOrDefault(c => c.Id == Designer.SelectedConnectionId)
+            : null;
+    }
+
+    private void UpdateDisplayName(string? value)
+    {
+        if (_selectedNode is null) return;
+        _selectedNode.DisplayName = value;
+        Designer.UpdateNode(_selectedNode);
+    }
+
+    private string GetProp(string key) =>
+        _selectedNode?.Properties.TryGetValue(key, out var v) == true ? v?.ToString() ?? "" : "";
+
+    private void SetProperty(string key, object? value)
+    {
+        if (_selectedNode is null) return;
+        _selectedNode.Properties[key] = value;
+        Designer.UpdateNode(_selectedNode);
+    }
+
+    private void UpdateConnectionCondition(string? condition)
+    {
+        if (_selectedConnection is null) return;
+        _selectedConnection.Condition = condition;
+    }
+
+    private RenderFragment RenderTextField(string label, string property) => builder =>
+    {
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "mb-2");
+        builder.OpenElement(2, "label");
+        builder.AddAttribute(3, "class", "form-label form-label-sm");
+        builder.AddContent(4, label);
+        builder.CloseElement();
+        builder.OpenElement(5, "input");
+        builder.AddAttribute(6, "type", "text");
+        builder.AddAttribute(7, "class", "form-control form-control-sm");
+        builder.AddAttribute(8, "value", GetProp(property));
+        builder.AddAttribute(9, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => SetProperty(property, e.Value)));
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+
+    private RenderFragment RenderTextArea(string label, string property) => builder =>
+    {
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "mb-2");
+        builder.OpenElement(2, "label");
+        builder.AddAttribute(3, "class", "form-label form-label-sm");
+        builder.AddContent(4, label);
+        builder.CloseElement();
+        builder.OpenElement(5, "textarea");
+        builder.AddAttribute(6, "class", "form-control form-control-sm");
+        builder.AddAttribute(7, "rows", "3");
+        builder.AddAttribute(8, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => SetProperty(property, e.Value)));
+        builder.AddContent(9, GetProp(property));
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+
+    private RenderFragment RenderDropdown(string label, string property, string[] options) => builder =>
+    {
+        var val = GetProp(property);
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "mb-2");
+        builder.OpenElement(2, "label");
+        builder.AddAttribute(3, "class", "form-label form-label-sm");
+        builder.AddContent(4, label);
+        builder.CloseElement();
+        builder.OpenElement(5, "select");
+        builder.AddAttribute(6, "class", "form-select form-select-sm");
+        builder.AddAttribute(7, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => SetProperty(property, e.Value)));
+        var seq = 8;
+        foreach (var opt in options)
+        {
+            builder.OpenElement(seq++, "option");
+            builder.AddAttribute(seq++, "value", opt);
+            if (opt == val) builder.AddAttribute(seq++, "selected", true);
+            builder.AddContent(seq++, opt);
+            builder.CloseElement();
+        }
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+
+    private RenderFragment RenderCheckbox(string label, string property) => builder =>
+    {
+        var val = _selectedNode?.Properties.TryGetValue(property, out var v) == true && v is true or "true" or "True";
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "form-check mb-2");
+        builder.OpenElement(2, "input");
+        builder.AddAttribute(3, "type", "checkbox");
+        builder.AddAttribute(4, "class", "form-check-input");
+        builder.AddAttribute(5, "checked", val);
+        builder.AddAttribute(6, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => SetProperty(property, e.Value)));
+        builder.CloseElement();
+        builder.OpenElement(7, "label");
+        builder.AddAttribute(8, "class", "form-check-label");
+        builder.AddContent(9, label);
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+
+    public void Dispose()
+    {
+        Designer.OnChange -= OnDesignerChanged;
+    }
+}
