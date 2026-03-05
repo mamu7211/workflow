@@ -16,6 +16,8 @@ var mailhog = builder.AddContainer("mailhog", "mailhog/mailhog", "latest")
 // --- Services ---
 
 var apiService = builder.AddProject<Projects.Workflow_ApiService>("apiservice")
+    .WithHttpEndpoint(port: 5452, name: "api-http")
+    .WithHttpsEndpoint(port: 7311, name: "api-https")
     .WithReference(postgres)
     .WithReference(rabbitmq)
     .WithEnvironment("Smtp__Host", mailhog.GetEndpoint("mailhog-smtp"))
