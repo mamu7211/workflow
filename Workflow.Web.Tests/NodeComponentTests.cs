@@ -1,4 +1,5 @@
 using Bunit;
+using Microsoft.AspNetCore.Components.Web;
 using Workflow.Engine.Models;
 using Workflow.Web.Components.Designer;
 
@@ -103,5 +104,24 @@ public class NodeComponentTests
         var style = nodeDiv.GetAttribute("style");
         Assert.IsTrue(style?.Contains("left: 150px"));
         Assert.IsTrue(style?.Contains("top: 200px"));
+    }
+
+    [TestMethod]
+    public void FiresDragStart_OnMouseDown()
+    {
+        using var ctx = new BunitContext();
+        var node = new ActivityNode { Id = "n1", Type = "Log", DisplayName = "Test" };
+        MouseEventArgs? receivedArgs = null;
+
+        var cut = ctx.Render<NodeComponent>(parameters => parameters
+            .Add(p => p.Node, node)
+            .Add(p => p.IsSelected, false)
+            .Add(p => p.OnDragStart, (MouseEventArgs e) => { receivedArgs = e; }));
+
+        cut.Find(".workflow-node").MouseDown(clientX: 100, clientY: 200);
+
+        Assert.IsNotNull(receivedArgs);
+        Assert.AreEqual(100, receivedArgs.ClientX);
+        Assert.AreEqual(200, receivedArgs.ClientY);
     }
 }

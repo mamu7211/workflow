@@ -115,6 +115,11 @@ public class DesignerStateService
         NotifyStateChanged();
     }
 
+    public void SaveSnapshot()
+    {
+        SaveState();
+    }
+
     private void SaveState()
     {
         if (CurrentWorkflow is null) return;

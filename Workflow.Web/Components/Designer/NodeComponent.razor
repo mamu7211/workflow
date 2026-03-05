@@ -33,10 +33,12 @@
     [Parameter] public EventCallback OnStartConnect { get; set; }
     [Parameter] public EventCallback OnEndConnect { get; set; }
     [Parameter] public EventCallback<(double X, double Y)> OnPositionChanged { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnDragStart { get; set; }
 
     private void OnMouseDown(MouseEventArgs e)
     {
         OnSelect.InvokeAsync();
+        OnDragStart.InvokeAsync(e);
     }
 
     private void OnOutputMouseDown(MouseEventArgs e)
