@@ -64,7 +64,7 @@
             {
                 _existingId = dto.Id;
                 _workflowName = dto.Name;
-                var definition = System.Text.Json.JsonSerializer.Deserialize<Workflow.Engine.Models.WorkflowDefinition>(dto.Definition.GetRawText());
+                var definition = Workflow.Engine.Serialization.WorkflowJsonConverter.DeserializeDefinition(dto.Definition.GetRawText());
                 if (definition is not null)
                 {
                     Designer.LoadWorkflow(definition);
@@ -90,8 +90,7 @@
         if (Designer.CurrentWorkflow is not null)
         {
             Designer.CurrentWorkflow.Name = _workflowName;
-            _jsonPreview = System.Text.Json.JsonSerializer.Serialize(Designer.CurrentWorkflow,
-                new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+            _jsonPreview = Workflow.Engine.Serialization.WorkflowJsonConverter.Serialize(Designer.CurrentWorkflow);
         }
         InvokeAsync(StateHasChanged);
     }
@@ -104,7 +103,7 @@
         try
         {
             Designer.CurrentWorkflow.Name = _workflowName;
-            var json = System.Text.Json.JsonSerializer.Serialize(Designer.CurrentWorkflow);
+            var json = Workflow.Engine.Serialization.WorkflowJsonConverter.Serialize(Designer.CurrentWorkflow);
             var element = System.Text.Json.JsonDocument.Parse(json).RootElement;
 
             if (_isNew && _existingId is null)
