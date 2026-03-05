@@ -17,31 +17,40 @@ Fixe einen Bug basierend auf seinem Bug-Dokument in `docs/bugs/`.
 
 Suche in `docs/bugs/` nach einer Datei, deren Name mit der angegebenen Nummer beginnt (z.B. `1` → `001-*`). Die Nummer wird auf drei Stellen mit fuehrenden Nullen aufgefuellt. Wenn keine passende Datei gefunden wird, informiere den User.
 
-### 2. Bug-Dokument lesen und pruefen
+### 2. Fix-Branch pruefen und wechseln
+
+Der Bug-Titel wird aus dem Dateinamen abgeleitet (z.B. `004-workflow-nodes-not-persisted-open.md` → `workflow-nodes-not-persisted`). Der erwartete Branch-Name ist `fix/<nummer>-<titel>` (z.B. `fix/004-workflow-nodes-not-persisted`).
+
+- Pruefe mit `git branch`, ob der Branch `fix/<nummer>-<titel>` bereits existiert.
+- **Wenn ja:** Wechsle in den Branch (`git checkout fix/<nummer>-<titel>`).
+- **Wenn nein:** Erstelle den Branch von `master` aus (`git checkout master && git checkout -b fix/<nummer>-<titel>`).
+- **Wichtig:** Arbeite IMMER im Fix-Branch, nie direkt auf `master`. Wenn der aktuelle Branch bereits der richtige Fix-Branch ist, bleibe dort.
+
+### 3. Bug-Dokument lesen und pruefen
 
 - Lies das Bug-Dokument.
 - Pruefe den Status: Nur Bugs mit Status `open` oder `blocked` koennen gefixt werden.
 - Wenn der Status `closed` oder `nofix` ist, informiere den User und brich ab.
 
-### 3. Betroffenen Code untersuchen
+### 4. Betroffenen Code untersuchen
 
 - Lies den im Bug-Dokument referenzierten Code.
 - Verstehe den Fix-Plan aus der `## Fix` Sektion.
 - Lies angrenzenden Code, um den Kontext zu verstehen und Seiteneffekte zu vermeiden.
 
-### 4. Fix implementieren
+### 5. Fix implementieren
 
 - Setze den Fix-Plan Schritt fuer Schritt um.
 - Halte dich an die bestehenden Code-Konventionen (siehe `CLAUDE.md`).
 - Aendere nur was noetig ist - keine unnoetige Refactorings.
 
-### 5. Build und Tests
+### 6. Build und Tests
 
 - Fuehre `dotnet build Workflow.sln` aus und behebe alle Build-Fehler.
 - Fuehre `dotnet test` aus und behebe alle fehlschlagenden Tests.
 - Wenn der Fix neue Testfaelle erfordert, schreibe diese.
 
-### 6. Bug-Status aktualisieren
+### 7. Bug-Status aktualisieren
 
 Wenn der Fix erfolgreich ist:
 
@@ -51,7 +60,7 @@ Wenn der Fix erfolgreich ist:
    - Das Muster ist: `<nummer>-<titel>-<status>.md`
 3. Verwende `git mv` fuer die Umbenennung, damit git die Aenderung trackt.
 
-### 7. Zusammenfassung
+### 8. Zusammenfassung
 
 Zeige dem User:
 - Welche Dateien geaendert wurden
