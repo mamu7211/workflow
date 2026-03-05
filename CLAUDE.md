@@ -41,13 +41,32 @@ dotnet run --project Workflow.AppHost
 | RabbitMQ | Message Queue für async Activities | Management UI via Aspire |
 | MailHog | SMTP-Testing | UI auf Port 8025, SMTP auf Port 1025 |
 
-## Branching
+## Branching & Workflow
 
-- Hauptbranch: `master`
-- Jede Spec-Phase wird in einem eigenen Feature-Branch implementiert
-- **Branch-Namenskonvention:** `feature/<spec-name>` (z.B. `feature/01-engine-core`, `feature/02-activities`)
-- Nach Fertigstellung wird der Branch in `master` gemergt
-- **WICHTIG:** Zu Beginn jeder Session den aktuellen Branch prüfen (`git branch`). Arbeite immer im passenden Feature-Branch für die jeweilige Phase. Wechsle ggf. mit `git checkout feature/<spec-name>` oder erstelle den Branch mit `git checkout -b feature/<spec-name>` von `master` aus.
+### Regeln
+
+- **Hauptbranch:** `master`
+- **Branch-Namenskonvention:** `feature/<spec-name>` (z.B. `feature/01-engine-core`)
+- **Feature-Branches IMMER von `master` erstellen:** `git checkout master && git checkout -b feature/<spec-name>`
+- **Merge-Strategie:** `git merge feature/<spec-name> --no-ff` (immer Merge-Commit)
+- **Nie direkt auf `master` committen** - immer Feature-Branch nutzen
+- **Session-Start:** `git branch` prüfen, in den passenden Feature-Branch wechseln
+
+### Workflow pro Phase
+
+1. `git checkout master && git checkout -b feature/<spec-name>`
+2. Implementierung gemäß Spec
+3. Tests grün: `dotnet test`
+4. `progress.md` aktualisieren
+5. Commit: `Phase X: Kurzbeschreibung`
+6. `git checkout master && git merge feature/<spec-name> --no-ff -m "Merge feature/<spec-name>: Beschreibung"`
+
+### Commit-Message-Konvention
+
+- **Implementation:** `Phase X: Kurzbeschreibung` (z.B. `Phase 3: API Service - REST API, EF Core persistence`)
+- **Merge:** `Merge feature/<spec-name>: Beschreibung`
+
+### Phase-Branch-Zuordnung
 
 | Phase | Spec | Branch |
 |-------|------|--------|
