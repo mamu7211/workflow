@@ -30,7 +30,7 @@
     [Parameter, EditorRequired] public Workflow.Engine.Models.ActivityNode Node { get; set; } = default!;
     [Parameter] public bool IsSelected { get; set; }
     [Parameter] public EventCallback OnSelect { get; set; }
-    [Parameter] public EventCallback OnStartConnect { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnStartConnect { get; set; }
     [Parameter] public EventCallback OnEndConnect { get; set; }
     [Parameter] public EventCallback<(double X, double Y)> OnPositionChanged { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> OnDragStart { get; set; }
@@ -43,7 +43,7 @@
 
     private void OnOutputMouseDown(MouseEventArgs e)
     {
-        OnStartConnect.InvokeAsync();
+        OnStartConnect.InvokeAsync(e);
     }
 
     private string GetCategoryClass() => Node.Type switch
