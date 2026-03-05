@@ -21,8 +21,10 @@
                 @if (sourceNode is not null && targetNode is not null)
                 {
                     <ConnectionLine Connection="connection"
-                                    SourceNode="sourceNode"
-                                    TargetNode="targetNode"
+                                    SourceX="sourceNode.X"
+                                    SourceY="sourceNode.Y"
+                                    TargetX="targetNode.X"
+                                    TargetY="targetNode.Y"
                                     IsSelected="Designer.SelectedConnectionId == connection.Id"
                                     OnSelect="() => Designer.SelectConnection(connection.Id)" />
                 }

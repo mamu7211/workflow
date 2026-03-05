@@ -1,11 +1,13 @@
+@using System.Globalization
+
 @{
-    var sx = SourceNode.X + 140;
-    var sy = SourceNode.Y + 30;
-    var tx = TargetNode.X;
-    var ty = TargetNode.Y + 30;
+    var sx = SourceX + 140;
+    var sy = SourceY + 30;
+    var tx = TargetX;
+    var ty = TargetY + 30;
 
     var dx = Math.Abs(tx - sx) * 0.5;
-    var path = $"M {sx} {sy} C {sx + dx} {sy}, {tx - dx} {ty}, {tx} {ty}";
+    var path = FormattableString.Invariant($"M {sx} {sy} C {sx + dx} {sy}, {tx - dx} {ty}, {tx} {ty}");
 }
 
 <g class="connection-group @(IsSelected ? "selected" : "")" @onclick="OnSelect" @onclick:stopPropagation="true">
@@ -19,14 +21,18 @@
     {
         var mx = (sx + tx) / 2;
         var my = (sy + ty) / 2;
-        @((MarkupString)$"<text x=\"{mx}\" y=\"{my - 8}\" class=\"connection-label\" text-anchor=\"middle\">{Connection.Condition}</text>")
+        var mxStr = mx.ToString(CultureInfo.InvariantCulture);
+        var myStr = (my - 8).ToString(CultureInfo.InvariantCulture);
+        @((MarkupString)$"<text x=\"{mxStr}\" y=\"{myStr}\" class=\"connection-label\" text-anchor=\"middle\">{Connection.Condition}</text>")
     }
 </g>
 
 @code {
     [Parameter, EditorRequired] public Workflow.Engine.Models.Connection Connection { get; set; } = default!;
-    [Parameter, EditorRequired] public Workflow.Engine.Models.ActivityNode SourceNode { get; set; } = default!;
-    [Parameter, EditorRequired] public Workflow.Engine.Models.ActivityNode TargetNode { get; set; } = default!;
+    [Parameter] public double SourceX { get; set; }
+    [Parameter] public double SourceY { get; set; }
+    [Parameter] public double TargetX { get; set; }
+    [Parameter] public double TargetY { get; set; }
     [Parameter] public bool IsSelected { get; set; }
     [Parameter] public EventCallback OnSelect { get; set; }
 }
