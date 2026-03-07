@@ -120,6 +120,33 @@
 | MailHog-Verifikation        | ⬜      |         |
 | End-to-End Test             | ⬜      |         |
 
+## Phase 6: MudBlazor Integration
+
+| Task                                                      | Status | Notizen                              |
+|-----------------------------------------------------------|--------|--------------------------------------|
+| MudBlazor 9.x NuGet installiert, Bootstrap entfernt       | ⬜      | Spec: 06-mudblazor-integration.md    |
+| MudProvider-Komponenten im Root-Layout                    | ⬜      | Theme, Popover, Dialog, Snackbar     |
+| MainLayout → MudLayout / MudAppBar / MudDrawer            | ⬜      |                                      |
+| NavMenu → MudNavMenu / MudNavLink                         | ⬜      |                                      |
+| Index.razor → MudGrid-Kacheln + MudTable                  | ⬜      |                                      |
+| WorkflowList → MudDataGrid + IDialogService               | ⬜      | Suche, Sortierung, Delete-Dialog     |
+| WorkflowInstances → MudDataGrid + MudChip Status-Farben   | ⬜      |                                      |
+| UserTasks → MudDataGrid + CompleteTaskDialog              | ⬜      | Neue Dialog-Komponente               |
+| WorkflowDesigner → MudToolBar + MudGrid Dreispalten       | ⬜      |                                      |
+| ActivityPalette → MudList / MudListSubheader              | ⬜      |                                      |
+| PropertyPanel → MudForm / MudTextField / MudSelect        | ⬜      |                                      |
+| SVG-Canvas-Komponenten (unverändert)                      | ⬜      | WorkflowCanvas, NodeComponent, ConnectionLine |
+| bUnit Tests auf MudBlazor-Selektoren angepasst            | ⬜      | AddMudServices() + JSInterop.Loose   |
+
+## Bug Fixes
+
+| Bug | Titel                                     | Status | Branch                               |
+|-----|-------------------------------------------|--------|--------------------------------------|
+| 003 | Designer Save - kein Error Handling       | 🚧     | fix/003-designer-save-no-error-handling |
+| 004 | Workflow Nodes werden nicht persistiert   | ✅      | fix/004-workflow-nodes-not-persisted |
+| 005 | Connection Rendering Issues               | ✅      | fix/005-connection-rendering-issues  |
+| 006 | MailHog Container startet nicht (Podman)  | ✅      | fix/006-mailhog-container-start-fails |
+
 ---
 
 ## Änderungslog
@@ -132,3 +159,7 @@
 | 2026-03-02 | Phase 2 abgeschlossen: 11 Built-in Activities mit Tests                         |
 | 2026-03-05 | Phase 3 abgeschlossen: API Service, Persistierung, Background Services          |
 | 2026-03-05 | Phase 4 abgeschlossen: Blazor WASM Frontend mit Node-Editor, 43 bUnit Tests     |
+| 2026-03-06 | Bug #004 geschlossen: JSON-Serialisierung Frontend/Backend vereinheitlicht      |
+| 2026-03-06 | Bug #005 geschlossen: Bezier-Preview + Pfeilspitzen korrekt gerendert           |
+| 2026-03-06 | Bug #006 geschlossen: MailHog Image-Name für Podman vollqualifiziert            |
+| 2026-03-07 | Phase 6 geplant: MudBlazor 9.x Integration (Spec: 06-mudblazor-integration.md) |
