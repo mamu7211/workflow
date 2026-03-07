@@ -9,7 +9,7 @@ var postgres = builder.AddPostgres("postgres")
 var rabbitmq = builder.AddRabbitMQ("messaging")
     .WithManagementPlugin();
 
-var mailhog = builder.AddContainer("mailhog", "mailhog/mailhog", "latest")
+var mailhog = builder.AddContainer("mailhog", "docker.io/mailhog/mailhog", "latest")
     .WithHttpEndpoint(port: 8025, targetPort: 8025, name: "mailhog-ui")
     .WithEndpoint(port: 1025, targetPort: 1025, name: "mailhog-smtp");
 
